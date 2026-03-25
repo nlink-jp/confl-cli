@@ -1,6 +1,5 @@
 import sys
 from pathlib import Path
-from typing import Optional
 
 import typer
 
@@ -12,7 +11,7 @@ config_app = typer.Typer(help="Manage ccli configuration.")
 
 @config_app.command("init")
 def config_init(
-    config_path: Optional[Path] = typer.Option(None, "--config", help="Config file path."),
+    config_path: Path | None = typer.Option(None, "--config", help="Config file path."),
 ) -> None:
     """Interactively initialize configuration."""
     dest = config_path or get_default_config_path()
@@ -32,7 +31,7 @@ def config_init(
         saved_path = save_config(config, dest)
     except Exception as e:
         typer.echo(f"Error saving config: {e}", err=True)
-        raise typer.Exit(code=6)
+        raise typer.Exit(code=6) from None
 
     typer.echo(f"\nConfiguration saved to: {saved_path}")
     if sys.platform != "win32":
@@ -41,14 +40,14 @@ def config_init(
 
 @config_app.command("show")
 def config_show(
-    config_path: Optional[Path] = typer.Option(None, "--config", help="Config file path."),
+    config_path: Path | None = typer.Option(None, "--config", help="Config file path."),
 ) -> None:
     """Show current configuration (API token is masked)."""
     try:
         config = load_config(config_path)
     except ConfigError as e:
         typer.echo(str(e), err=True)
-        raise typer.Exit(code=e.exit_code)
+        raise typer.Exit(code=e.exit_code) from None
 
     token = config.confluence.api_token
     masked = token[:4] + "*" * max(len(token) - 4, 4) if len(token) > 4 else "****"

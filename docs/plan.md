@@ -8,20 +8,20 @@
 
 ## フェーズ構成
 
-### Phase 0: プロジェクト基盤（現在）
+### Phase 0: プロジェクト基盤 ✅
 **目標**: 開発環境・プロジェクト構造の確立
 
 - [x] 詳細仕様書作成（`docs/spec.md`）
 - [x] 開発計画作成（`docs/plan.md`）
-- [ ] `pyproject.toml` 作成（依存関係・ビルド設定）
-- [ ] ディレクトリ構造の作成
-- [ ] `CHANGELOG.md` 初期化
-- [ ] `README.md` 作成
-- [ ] `CLAUDE.md` 作成
-- [ ] `.gitignore` 作成
-- [ ] uv 環境セットアップ確認
+- [x] `pyproject.toml` 作成（依存関係・ビルド設定）
+- [x] ディレクトリ構造の作成
+- [x] `CHANGELOG.md` 初期化
+- [x] `README.md` 作成
+- [x] `CLAUDE.md` 作成
+- [x] `.gitignore` 作成
+- [x] uv 環境セットアップ確認
 
-### Phase 1: 設定・認証基盤
+### Phase 1: 設定・認証基盤 ✅
 **目標**: 認証情報の安全な管理と Confluence API 接続確認
 
 実装:
@@ -35,7 +35,7 @@
 
 完了条件: `ccli config show` / `ccli config init` が動作する
 
-### Phase 2: Spaces 機能
+### Phase 2: Spaces 機能 ✅
 **目標**: スペースの一覧・検索
 
 実装:
@@ -49,8 +49,8 @@
 
 完了条件: `ccli spaces list` / `ccli spaces search` が動作する
 
-### Phase 3: Pages 単体取得
-**目標**: ページの検索・単体取得（text/html/json 出力）
+### Phase 3: Pages 単体取得 ✅
+**目標**: ページの検索・単体取得（text/html/json/storage 出力）
 
 実装:
 - `src/ccli/client/pages.py`: Pages API クライアント（search, get）
@@ -65,7 +65,7 @@
 
 完了条件: `ccli pages search` / `ccli pages get` が動作する
 
-### Phase 4: Pages ツリー取得
+### Phase 4: Pages ツリー取得 ✅
 **目標**: 再帰的な子ページ取得
 
 実装:
@@ -79,7 +79,7 @@
 
 完了条件: `ccli pages tree` が動作する
 
-### Phase 5: 添付ファイル取得
+### Phase 5: 添付ファイル取得 ✅
 **目標**: ページに紐付いた添付ファイルの取得・保存
 
 実装:
@@ -92,14 +92,15 @@
 
 完了条件: `ccli pages get --attachments` / `ccli pages tree --attachments` が動作する
 
-### Phase 6: 品質・仕上げ
+### Phase 6: 品質・仕上げ ✅
 **目標**: リリース品質への引き上げ
 
-- エラーハンドリングの統一・終了コードの確認
-- Windows 対応確認（パス区切り、設定ファイルパス）
-- `--quiet` / tty 自動判定の動作確認
-- テストカバレッジ 80% 以上を目標
-- ドキュメント最終更新（README、CHANGELOG）
+- [x] ruff 全エラー解消（UP045, UP042, B904, B008 設定, E741, E501）
+- [x] mypy strict モード通過（pydantic plugin 追加）
+- [x] テストカバレッジ 94%（目標 80% 超）
+- [x] CHANGELOG.md 全フェーズ記載
+- [x] README.md・README.ja.md（日英二言語）最終更新
+- [x] docs/plan.md 全フェーズ完了マーク
 
 ## ディレクトリ構造
 

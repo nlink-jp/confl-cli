@@ -1,4 +1,3 @@
-import pytest
 from pytest_httpx import HTTPXMock
 
 from ccli.auth import build_client
@@ -11,7 +10,9 @@ SPACES_URL = f"{BASE_URL}/wiki/api/v2/spaces"
 
 _SPACE_A = {"id": "1", "key": "DEV", "name": "Development", "type": "global", "status": "current"}
 _SPACE_B = {"id": "2", "key": "ARCH", "name": "Architecture", "type": "global", "status": "current"}
-_SPACE_P = {"id": "3", "key": "~john", "name": "John's Space", "type": "personal", "status": "current"}
+_SPACE_P = {
+    "id": "3", "key": "~john", "name": "John's Space", "type": "personal", "status": "current"
+}
 
 
 def _make_spaces_client(httpx_mock: HTTPXMock) -> SpacesClient:

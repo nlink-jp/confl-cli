@@ -1,26 +1,28 @@
 # ccli
 
-Atlassian Confluence Cloud をコマンドラインから操作する CLI ツール。
+A CLI tool for Atlassian Confluence Cloud.
 
-UNIX 哲学に基づき、パイプで他コマンドと組み合わせて使えるよう設計されています。
+Designed around the UNIX philosophy — stdout is data, stderr is logs — so it composes naturally with `jq`, `grep`, and other shell tools.
 
-## 機能
+[日本語版 README](README.ja.md)
 
-- スペースの一覧・検索
-- ページの検索・取得（HTML / JSON / テキスト形式）
-- ページツリーの再帰的取得
-- 添付ファイルの取得・保存
+## Features
 
-## インストール
+- List and search spaces
+- Search pages (full-text via CQL)
+- Read a single page (text / HTML / JSON / Confluence Storage Format)
+- Recursively read a page tree
+- Fetch attachment metadata and download files to disk (path-traversal safe)
+
+## Installation
 
 ```bash
-# uv を使ってインストール
 uv tool install ccli
 ```
 
-## 設定
+## Configuration
 
-環境変数で認証情報を設定する（推奨）:
+Set credentials via environment variables (recommended):
 
 ```bash
 export CONFLUENCE_URL=https://your-domain.atlassian.net
@@ -28,60 +30,86 @@ export CONFLUENCE_USERNAME=you@example.com
 export CONFLUENCE_API_TOKEN=your-api-token
 ```
 
-API Token の発行: <https://id.atlassian.com/manage-profile/security/api-tokens>
+Generate an API token at: <https://id.atlassian.com/manage-profile/security/api-tokens>
 
-または設定ファイルで設定する:
+Or run the interactive setup wizard:
 
 ```bash
 ccli config init
 ```
 
-## 使い方
+The config file is stored at `~/.config/ccli/config.toml` (Linux/macOS) or `%APPDATA%\ccli\config.toml` (Windows).
+
+## Usage
 
 ```bash
-# スペース一覧
+# List spaces
 ccli spaces list
 
-# スペース検索
+# Search spaces
 ccli spaces search "Engineering"
 
-# ページ検索
+# Search pages (full-text)
 ccli pages search "Getting Started" --space DEV
 
-# ページ取得（テキスト形式）
+# Get a page as plain text (Markdown-ified)
 ccli pages get 123456789
 
-# ページ取得（JSON形式、パイプで jq に渡す）
+# Get a page as JSON and pipe to jq
 ccli pages get 123456789 --format json | jq '.title'
 
-# ページ取得（添付ファイルも保存）
+# Get a page in Confluence Storage Format (internal XHTML-like source)
+ccli pages get 123456789 --format storage
+
+# Get a page and download its attachments
 ccli pages get 123456789 --attachments --output-dir ./downloads
 
-# ページツリーを再帰取得（JSON）
+# Get the full page tree rooted at a page (JSON)
 ccli pages tree 123456789 --format json | jq '.'
 
-# ページツリー（深さ2まで、添付ファイル付き）
+# Get a page tree to depth 2 and download all attachments
 ccli pages tree 123456789 --depth 2 --attachments --output-dir ./downloads
 ```
 
-## 開発
+### Output formats for `pages get`
 
-Python 3.11 以上と [uv](https://docs.astral.sh/uv/) が必要です。
+| Flag | Output |
+|------|--------|
+| *(default)* | Markdown text via markdownify |
+| `--format html` | Raw rendered HTML |
+| `--format json` | Structured JSON (title, body, metadata, attachments) |
+| `--format storage` | Confluence Storage Format (raw XHTML-like internal source) |
+
+### Exit codes
+
+| Code | Meaning |
+|------|---------|
+| 0 | Success |
+| 1 | Authentication error |
+| 2 | Forbidden |
+| 3 | Not found |
+| 4 | Network error |
+| 5 | Rate limit exceeded |
+| 6 | Configuration error |
+
+## Development
+
+Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/your-org/ccli.git
+git clone <repo-url>
 cd ccli
 uv sync --all-extras
 ```
 
-テスト実行:
+Run tests:
 
 ```bash
 uv run pytest
 uv run pytest --cov=ccli --cov-report=term-missing
 ```
 
-Lint / フォーマット:
+Lint / format / type-check:
 
 ```bash
 uv run ruff check .
@@ -89,6 +117,6 @@ uv run ruff format .
 uv run mypy src/
 ```
 
-## ライセンス
+## License
 
 MIT © magifd2

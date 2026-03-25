@@ -59,7 +59,9 @@ class TestSpacesList:
         httpx_mock.add_response(json={"results": [_SPACE_A, _SPACE_B], "_links": {}})
         result = runner.invoke(app, ["spaces", "list", "--limit", "1"])
         assert result.exit_code == 0
-        data_lines = [l for l in result.output.splitlines() if "DEV" in l or "ARCH" in l]
+        data_lines = [
+            line for line in result.output.splitlines() if "DEV" in line or "ARCH" in line
+        ]
         assert len(data_lines) == 1
 
 

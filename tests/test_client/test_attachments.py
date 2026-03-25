@@ -1,4 +1,3 @@
-import pytest
 from pytest_httpx import HTTPXMock
 
 from ccli.auth import build_client
@@ -49,11 +48,12 @@ class TestAttachmentsList:
         assert attachments[0].download_url == "/wiki/download/attachments/100/design.pdf"
 
     def test_download_url_from_top_level_field(self, httpx_mock: HTTPXMock) -> None:
+        # downloadLink without /wiki prefix → should be normalized to /wiki/...
         att = {**_ATT_A, "downloadLink": "/direct/download/link", "_links": {}}
         httpx_mock.add_response(json={"results": [att], "_links": {}})
         client = _make_client(httpx_mock)
         attachments = client.list("100")
-        assert attachments[0].download_url == "/direct/download/link"
+        assert attachments[0].download_url == "/wiki/direct/download/link"
 
     def test_empty_results(self, httpx_mock: HTTPXMock) -> None:
         httpx_mock.add_response(json={"results": [], "_links": {}})

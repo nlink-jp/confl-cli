@@ -1,6 +1,5 @@
-from enum import Enum
+from enum import StrEnum
 from pathlib import Path
-from typing import Optional
 
 import httpx
 import typer
@@ -20,14 +19,14 @@ from ..formatters.text import print_page, print_page_summaries, print_page_tree
 pages_app = typer.Typer(help="Page operations.")
 
 
-class OutputFormat(str, Enum):
+class OutputFormat(StrEnum):
     text = "text"
     json = "json"
     html = "html"
     storage = "storage"  # Confluence Storage Format (XHTML-like source)
 
 
-class TreeOutputFormat(str, Enum):
+class TreeOutputFormat(StrEnum):
     text = "text"
     json = "json"
 
@@ -37,7 +36,7 @@ def _setup() -> tuple[Config, httpx.Client, ConfluenceClient]:
         config = load_config()
     except ConfigError as exc:
         typer.echo(str(exc), err=True)
-        raise typer.Exit(code=exc.exit_code)
+        raise typer.Exit(code=exc.exit_code) from None
     http_client = build_client(config)
     return config, http_client, ConfluenceClient(http_client)
 
@@ -45,11 +44,14 @@ def _setup() -> tuple[Config, httpx.Client, ConfluenceClient]:
 @pages_app.command("search")
 def pages_search(
     query: str = typer.Argument(help="Search query (full-text search via CQL)."),
-    space: Optional[str] = typer.Option(None, "--space", "-s", help="Filter by space key."),
+    space: str | None = typer.Option(None, "--space", "-s", help="Filter by space key."),
     limit: int = typer.Option(25, "--limit", "-n", help="Maximum number of results."),
     format: OutputFormat = typer.Option(OutputFormat.text, "--format", "-f"),
 ) -> None:
     """Search pages by full-text query."""
+    if not query.strip():
+        typer.echo("Error: search query must not be empty.", err=True)
+        raise typer.Exit(code=1)
     config, _, cc = _setup()
     try:
         summaries = PagesClient(cc, config.confluence.url).search(
@@ -57,7 +59,7 @@ def pages_search(
         )
     except CCLIError as exc:
         typer.echo(str(exc), err=True)
-        raise typer.Exit(code=exc.exit_code)
+        raise typer.Exit(code=exc.exit_code) from None
 
     if format == OutputFormat.json:
         print_json([s.model_dump() for s in summaries])
@@ -69,8 +71,8 @@ def pages_search(
 def pages_get(
     page_id: str = typer.Argument(help="Page ID."),
     format: OutputFormat = typer.Option(OutputFormat.text, "--format", "-f"),
-    with_attachments: bool = typer.Option(False, "--attachments", help="Fetch attachment metadata."),
-    output_dir: Optional[Path] = typer.Option(
+    with_attachments: bool = typer.Option(False, "--attachments", help="Fetch attachment metadata."),  # noqa: E501
+    output_dir: Path | None = typer.Option(
         None, "--output-dir", help="Download attachments to this directory."
     ),
 ) -> None:
@@ -80,14 +82,14 @@ def pages_get(
         page = PagesClient(cc, config.confluence.url).get(page_id)
     except CCLIError as exc:
         typer.echo(str(exc), err=True)
-        raise typer.Exit(code=exc.exit_code)
+        raise typer.Exit(code=exc.exit_code) from None
 
     if with_attachments or output_dir:
         try:
             attachments = AttachmentsClient(cc).list(page_id)
         except CCLIError as exc:
             typer.echo(str(exc), err=True)
-            raise typer.Exit(code=exc.exit_code)
+            raise typer.Exit(code=exc.exit_code) from None
 
         if output_dir:
             for att in attachments:
@@ -113,12 +115,12 @@ def pages_get(
 @pages_app.command("tree")
 def pages_tree(
     page_id: str = typer.Argument(help="Root page ID."),
-    depth: Optional[int] = typer.Option(
+    depth: int | None = typer.Option(
         None, "--depth", "-d", help="Max recursion depth (default: unlimited)."
     ),
     format: TreeOutputFormat = typer.Option(TreeOutputFormat.text, "--format", "-f"),
-    with_attachments: bool = typer.Option(False, "--attachments", help="Fetch attachment metadata."),
-    output_dir: Optional[Path] = typer.Option(
+    with_attachments: bool = typer.Option(False, "--attachments", help="Fetch attachment metadata."),  # noqa: E501
+    output_dir: Path | None = typer.Option(
         None, "--output-dir", help="Download attachments to this directory."
     ),
 ) -> None:
@@ -128,7 +130,7 @@ def pages_tree(
         tree = PagesClient(cc, config.confluence.url).get_tree(page_id, depth=depth)
     except CCLIError as exc:
         typer.echo(str(exc), err=True)
-        raise typer.Exit(code=exc.exit_code)
+        raise typer.Exit(code=exc.exit_code) from None
 
     if with_attachments or output_dir:
         _populate_tree_attachments(
@@ -145,7 +147,7 @@ def _populate_tree_attachments(
     node: PageNode,
     attach_client: AttachmentsClient,
     http_client: httpx.Client,
-    output_dir: Optional[Path],
+    output_dir: Path | None,
 ) -> None:
     """Recursively fetch (and optionally download) attachments for every node."""
     try:

@@ -1,7 +1,11 @@
 import re
+import time
 from pathlib import Path
 
 import httpx
+
+_MAX_RETRIES = 3
+_RETRY_BASE_DELAY = 1.0
 
 
 def safe_attachment_dest(output_dir: Path, page_id: str, filename: str) -> Path:
@@ -38,11 +42,38 @@ def safe_attachment_dest(output_dir: Path, page_id: str, filename: str) -> Path:
 
 
 def download_file(http_client: httpx.Client, url: str, dest: Path) -> None:
-    """Stream-download *url* to *dest*, creating parent directories as needed."""
+    """Stream-download *url* to *dest*, creating parent directories as needed.
+
+    Retries up to _MAX_RETRIES times on transient errors (network errors,
+    timeouts, 5xx responses) with exponential back-off.  Any partial file is
+    removed before each retry so the destination is always complete or absent.
+    """
     dest.parent.mkdir(parents=True, exist_ok=True)
-    with http_client.stream("GET", url) as response:
-        response.raise_for_status()
-        with open(dest, "wb") as f:
-            for chunk in response.iter_bytes(chunk_size=8192):
-                if chunk:
-                    f.write(chunk)
+    for attempt in range(_MAX_RETRIES + 1):
+        try:
+            with http_client.stream("GET", url, follow_redirects=True) as response:
+                response.raise_for_status()
+                with open(dest, "wb") as f:
+                    for chunk in response.iter_bytes(chunk_size=8192):
+                        if chunk:
+                            f.write(chunk)
+            return  # success
+        except (httpx.NetworkError, httpx.TimeoutException):
+            if attempt >= _MAX_RETRIES:
+                raise
+            _remove_partial(dest)
+            time.sleep(_RETRY_BASE_DELAY * (2**attempt))
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code >= 500 and attempt < _MAX_RETRIES:
+                _remove_partial(dest)
+                time.sleep(_RETRY_BASE_DELAY * (2**attempt))
+            else:
+                raise
+
+
+def _remove_partial(dest: Path) -> None:
+    """Remove a partially written file, ignoring errors."""
+    try:
+        dest.unlink(missing_ok=True)
+    except OSError:
+        pass

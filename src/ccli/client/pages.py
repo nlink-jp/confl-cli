@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+import re
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -13,6 +14,13 @@ _CONTENT_PATH = f"{API_V1}/content"
 
 _GET_EXPAND = "body.view,body.storage,space,version,ancestors,history"
 
+_HL_PATTERN = re.compile(r"@@@hl@@@|@@@endhl@@@")
+
+
+def _strip_highlights(text: str) -> str:
+    """Remove Confluence search highlight markers from a string."""
+    return _HL_PATTERN.sub("", text)
+
 
 # --------------------------------------------------------------------------- #
 # Public domain models                                                         #
@@ -21,7 +29,7 @@ _GET_EXPAND = "body.view,body.storage,space,version,ancestors,history"
 
 class Author(BaseModel):
     display_name: str
-    email: Optional[str] = None
+    email: str | None = None
 
 
 class Page(BaseModel):
@@ -36,7 +44,7 @@ class Page(BaseModel):
     body_html: str
     body_storage: str  # Confluence Storage Format (XHTML-like)
     url: str
-    parent_id: Optional[str] = None
+    parent_id: str | None = None
     attachments: list[Attachment] = []
 
 
@@ -95,7 +103,7 @@ class _SpaceInfo(BaseModel):
 
 class _By(BaseModel):
     display_name: str = Field("", alias="displayName")
-    email: Optional[str] = None
+    email: str | None = None
 
     model_config = {"populate_by_name": True}
 
@@ -148,7 +156,7 @@ class _SearchContent(BaseModel):
 
 
 class _SearchResult(BaseModel):
-    content: Optional[_SearchContent] = None
+    content: _SearchContent | None = None
     title: str = ""
     excerpt: str = ""
     url: str = ""
@@ -177,7 +185,7 @@ class PagesClient:
     def search(
         self,
         query: str,
-        space_key: Optional[str] = None,
+        space_key: str | None = None,
         limit: int = 25,
     ) -> list[PageSummary]:
         cql = f'text ~ "{query}" AND type = page'
@@ -201,12 +209,12 @@ class PagesClient:
                     id=content.id if content else "",
                     space_key=content.space.key if content else "",
                     space_name=content.space.name if content else "",
-                    title=result.title,
+                    title=_strip_highlights(result.title),
                     url=result.url or (
                         self._base_url + content.links.get("webui", "") if content else ""
                     ),
                     last_modified=result.last_modified,
-                    excerpt=result.excerpt,
+                    excerpt=_strip_highlights(result.excerpt),
                 )
             )
 
@@ -242,7 +250,7 @@ class PagesClient:
     # Tree operations (use v2 API — metadata only, no body content)           #
     # ---------------------------------------------------------------------- #
 
-    def get_tree(self, page_id: str, depth: Optional[int] = None) -> PageNode:
+    def get_tree(self, page_id: str, depth: int | None = None) -> PageNode:
         """Return a tree of PageNode starting from *page_id*.
 
         Only id, title, and url are fetched per node; body content is omitted
@@ -264,7 +272,7 @@ class PagesClient:
 
     def _get_children_meta(self, page_id: str) -> list[PageNode]:
         children: list[PageNode] = []
-        cursor: Optional[str] = None
+        cursor: str | None = None
 
         while True:
             params: dict[str, Any] = {"limit": 250}
@@ -297,7 +305,7 @@ class PagesClient:
         return children
 
     def _fill_children(
-        self, node: PageNode, depth: Optional[int], current_depth: int
+        self, node: PageNode, depth: int | None, current_depth: int
     ) -> None:
         if depth is not None and current_depth >= depth:
             return

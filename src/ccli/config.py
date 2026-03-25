@@ -2,7 +2,6 @@ import os
 import sys
 import tomllib
 from pathlib import Path
-from typing import Optional
 
 from pydantic import BaseModel, field_validator
 
@@ -38,7 +37,7 @@ def get_default_config_path() -> Path:
     return base / "ccli" / "config.toml"
 
 
-def load_from_env() -> Optional[Config]:
+def load_from_env() -> Config | None:
     url = os.environ.get("CONFLUENCE_URL")
     username = os.environ.get("CONFLUENCE_USERNAME")
     api_token = os.environ.get("CONFLUENCE_API_TOKEN")
@@ -83,7 +82,7 @@ def load_from_file(path: Path) -> Config:
         raise ConfigError(f"Invalid config file: {e}") from e
 
 
-def load_config(config_path: Optional[Path] = None) -> Config:
+def load_config(config_path: Path | None = None) -> Config:
     """Load config from env vars (priority) or config file (fallback)."""
     config = load_from_env()
     if config:
@@ -92,7 +91,7 @@ def load_config(config_path: Optional[Path] = None) -> Config:
     return load_from_file(path)
 
 
-def save_config(config: Config, path: Optional[Path] = None) -> Path:
+def save_config(config: Config, path: Path | None = None) -> Path:
     dest = path or get_default_config_path()
     dest.parent.mkdir(parents=True, exist_ok=True)
 

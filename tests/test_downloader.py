@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import httpx
 import pytest
 from pytest_httpx import HTTPXMock
 
@@ -48,6 +49,85 @@ def test_overwrites_existing_file(httpx_mock: HTTPXMock, tmp_path: Path) -> None
     download_file(_make_http_client(), DOWNLOAD_URL, dest)
 
     assert dest.read_bytes() == b"new content"
+
+
+# --------------------------------------------------------------------------- #
+# download_file retry                                                           #
+# --------------------------------------------------------------------------- #
+
+
+class TestDownloadFileRetry:
+    def test_retries_on_network_error_and_succeeds(
+        self, httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setattr("ccli.downloader.time.sleep", lambda _: None)
+        httpx_mock.add_exception(httpx.NetworkError("connection reset"))
+        httpx_mock.add_response(content=b"good data")
+        dest = tmp_path / "file.bin"
+        download_file(_make_http_client(), DOWNLOAD_URL, dest)
+        assert dest.read_bytes() == b"good data"
+
+    def test_retries_on_server_error_and_succeeds(
+        self, httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setattr("ccli.downloader.time.sleep", lambda _: None)
+        httpx_mock.add_response(status_code=500)
+        httpx_mock.add_response(content=b"good data")
+        dest = tmp_path / "file.bin"
+        download_file(_make_http_client(), DOWNLOAD_URL, dest)
+        assert dest.read_bytes() == b"good data"
+
+    def test_removes_partial_file_before_retry(
+        self, httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setattr("ccli.downloader.time.sleep", lambda _: None)
+        httpx_mock.add_exception(httpx.NetworkError("connection reset"))
+        httpx_mock.add_response(content=b"good data")
+        dest = tmp_path / "file.bin"
+        dest.write_bytes(b"partial")  # simulate leftover from previous run
+        download_file(_make_http_client(), DOWNLOAD_URL, dest)
+        assert dest.read_bytes() == b"good data"
+
+    def test_raises_after_max_retries_on_network_error(
+        self, httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setattr("ccli.downloader.time.sleep", lambda _: None)
+        for _ in range(4):  # _MAX_RETRIES + 1
+            httpx_mock.add_exception(httpx.NetworkError("connection reset"))
+        dest = tmp_path / "file.bin"
+        with pytest.raises(httpx.NetworkError):
+            download_file(_make_http_client(), DOWNLOAD_URL, dest)
+
+    def test_raises_after_max_retries_on_server_error(
+        self, httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setattr("ccli.downloader.time.sleep", lambda _: None)
+        for _ in range(4):  # _MAX_RETRIES + 1
+            httpx_mock.add_response(status_code=500)
+        dest = tmp_path / "file.bin"
+        with pytest.raises(httpx.HTTPStatusError):
+            download_file(_make_http_client(), DOWNLOAD_URL, dest)
+
+    def test_does_not_retry_on_4xx(
+        self, httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        monkeypatch.setattr("ccli.downloader.time.sleep", lambda _: None)
+        httpx_mock.add_response(status_code=404)
+        dest = tmp_path / "file.bin"
+        with pytest.raises(httpx.HTTPStatusError):
+            download_file(_make_http_client(), DOWNLOAD_URL, dest)
+        assert len(httpx_mock.get_requests()) == 1  # no retry
+
+    def test_backoff_applied_on_network_error(
+        self, httpx_mock: HTTPXMock, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    ) -> None:
+        sleep_calls: list[float] = []
+        monkeypatch.setattr("ccli.downloader.time.sleep", lambda s: sleep_calls.append(s))
+        httpx_mock.add_exception(httpx.NetworkError("connection reset"))
+        httpx_mock.add_response(content=b"data")
+        dest = tmp_path / "file.bin"
+        download_file(_make_http_client(), DOWNLOAD_URL, dest)
+        assert sleep_calls[0] == 1.0  # _RETRY_BASE_DELAY * 2**0
 
 
 # --------------------------------------------------------------------------- #

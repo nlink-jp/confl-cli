@@ -1,5 +1,4 @@
-from enum import Enum
-from typing import Optional
+from enum import StrEnum
 
 import typer
 
@@ -15,12 +14,12 @@ from ..formatters.text import print_spaces
 spaces_app = typer.Typer(help="Space operations.")
 
 
-class OutputFormat(str, Enum):
+class OutputFormat(StrEnum):
     text = "text"
     json = "json"
 
 
-class SpaceType(str, Enum):
+class SpaceType(StrEnum):
     global_ = "global"
     personal = "personal"
 
@@ -30,14 +29,14 @@ def _make_spaces_client() -> SpacesClient:
         config = load_config()
     except ConfigError as exc:
         typer.echo(str(exc), err=True)
-        raise typer.Exit(code=exc.exit_code)
+        raise typer.Exit(code=exc.exit_code) from None
     return SpacesClient(ConfluenceClient(build_client(config)))
 
 
 @spaces_app.command("list")
 def spaces_list(
     limit: int = typer.Option(25, "--limit", "-n", help="Maximum number of results."),
-    space_type: Optional[SpaceType] = typer.Option(None, "--type", help="Filter by space type."),
+    space_type: SpaceType | None = typer.Option(None, "--type", help="Filter by space type."),
     format: OutputFormat = typer.Option(OutputFormat.text, "--format", "-f"),
 ) -> None:
     """List spaces."""
@@ -49,7 +48,7 @@ def spaces_list(
         )
     except CCLIError as exc:
         typer.echo(str(exc), err=True)
-        raise typer.Exit(code=exc.exit_code)
+        raise typer.Exit(code=exc.exit_code) from None
 
     if format == OutputFormat.json:
         print_json([s.model_dump(by_alias=False) for s in spaces])
@@ -69,7 +68,7 @@ def spaces_search(
         spaces = client.search(query=query, limit=limit)
     except CCLIError as exc:
         typer.echo(str(exc), err=True)
-        raise typer.Exit(code=exc.exit_code)
+        raise typer.Exit(code=exc.exit_code) from None
 
     if format == OutputFormat.json:
         print_json([s.model_dump(by_alias=False) for s in spaces])

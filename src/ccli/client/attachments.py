@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import parse_qs, urlparse
 
 from pydantic import BaseModel, Field
@@ -15,7 +15,7 @@ class Attachment(BaseModel):
     media_type: str
     size_bytes: int
     download_url: str  # relative URL (e.g. /wiki/download/attachments/...)
-    saved_path: Optional[str] = None  # populated after download
+    saved_path: str | None = None  # populated after download
 
 
 class _AttachmentMeta(BaseModel):
@@ -41,6 +41,17 @@ class _AttachmentsResponse(BaseModel):
     model_config = {"populate_by_name": True}
 
 
+def _normalize_download_url(url: str) -> str:
+    """Prepend /wiki if the URL is a Confluence-relative path lacking it.
+
+    The v2 API _links.download sometimes returns /download/... instead of
+    /wiki/download/..., depending on the instance version.
+    """
+    if url and not url.startswith("/wiki") and not url.startswith("http"):
+        return "/wiki" + url
+    return url
+
+
 class AttachmentsClient:
     def __init__(self, client: ConfluenceClient) -> None:
         self._client = client
@@ -48,7 +59,7 @@ class AttachmentsClient:
     def list(self, page_id: str) -> list[Attachment]:
         """Return all attachments for *page_id*, following pagination cursors."""
         attachments: list[Attachment] = []
-        cursor: Optional[str] = None
+        cursor: str | None = None
 
         while True:
             params: dict[str, Any] = {"limit": 250}
@@ -65,7 +76,7 @@ class AttachmentsClient:
                         filename=meta.title,
                         media_type=meta.media_type,
                         size_bytes=meta.file_size,
-                        download_url=meta.resolved_download_url,
+                        download_url=_normalize_download_url(meta.resolved_download_url),
                     )
                 )
 
