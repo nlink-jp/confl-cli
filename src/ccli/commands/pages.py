@@ -10,7 +10,7 @@ from ..client.attachments import AttachmentsClient
 from ..client.base import ConfluenceClient
 from ..client.pages import PageNode, PagesClient
 from ..config import Config, load_config
-from ..downloader import download_file
+from ..downloader import download_file, safe_attachment_dest
 from ..exceptions import CCLIError, ConfigError
 from ..formatters.base import use_color
 from ..formatters.html_fmt import print_html
@@ -91,8 +91,8 @@ def pages_get(
 
         if output_dir:
             for att in attachments:
-                dest = output_dir / page_id / att.filename
                 try:
+                    dest = safe_attachment_dest(output_dir, page_id, att.filename)
                     download_file(http_client, att.download_url, dest)
                     att.saved_path = str(dest)
                 except Exception as exc:  # noqa: BLE001
@@ -156,8 +156,8 @@ def _populate_tree_attachments(
 
     if output_dir:
         for att in attachments:
-            dest = output_dir / node.id / att.filename
             try:
+                dest = safe_attachment_dest(output_dir, node.id, att.filename)
                 download_file(http_client, att.download_url, dest)
                 att.saved_path = str(dest)
             except Exception as exc:  # noqa: BLE001
