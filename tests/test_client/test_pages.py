@@ -39,7 +39,10 @@ _CONTENT_RESPONSE = {
         "createdDate": "2023-06-01T08:00:00.000Z",
         "createdBy": {"displayName": "Jane Smith"},
     },
-    "body": {"view": {"value": "<p>Hello <strong>world</strong></p>"}},
+    "body": {
+        "view": {"value": "<p>Hello <strong>world</strong></p>"},
+        "storage": {"value": "<p>Hello <ac:structured-macro ac:name=\"strong\"><ac:rich-text-body>world</ac:rich-text-body></ac:structured-macro></p>"},
+    },
     "ancestors": [{"id": "100"}, {"id": "101"}],
     "_links": {"webui": "/wiki/spaces/DEV/pages/123/My+Page"},
 }
@@ -118,6 +121,12 @@ class TestPagesGet:
         client = _make_client(httpx_mock)
         page = client.get("123")
         assert "<p>" in page.body_html
+
+    def test_body_storage_populated(self, httpx_mock: HTTPXMock) -> None:
+        httpx_mock.add_response(json=_CONTENT_RESPONSE)
+        client = _make_client(httpx_mock)
+        page = client.get("123")
+        assert "ac:structured-macro" in page.body_storage
 
     def test_parent_id_is_last_ancestor(self, httpx_mock: HTTPXMock) -> None:
         httpx_mock.add_response(json=_CONTENT_RESPONSE)

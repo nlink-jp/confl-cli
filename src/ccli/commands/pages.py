@@ -20,6 +20,7 @@ class OutputFormat(str, Enum):
     text = "text"
     json = "json"
     html = "html"
+    storage = "storage"  # Confluence Storage Format (XHTML-like source)
 
 
 def _make_pages_client() -> PagesClient:
@@ -69,5 +70,7 @@ def pages_get(
         print_json(page.model_dump())
     elif format == OutputFormat.html:
         print_html(page.body_html)
+    elif format == OutputFormat.storage:
+        print(page.body_storage)
     else:
         print_page(page, color=use_color())

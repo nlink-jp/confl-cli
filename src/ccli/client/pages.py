@@ -10,7 +10,7 @@ from .base import ConfluenceClient
 _SEARCH_PATH = f"{API_V1}/search"
 _CONTENT_PATH = f"{API_V1}/content"
 
-_GET_EXPAND = "body.view,space,version,ancestors,history"
+_GET_EXPAND = "body.view,body.storage,space,version,ancestors,history"
 
 
 # --------------------------------------------------------------------------- #
@@ -33,6 +33,7 @@ class Page(BaseModel):
     updated_at: str
     author: Author
     body_html: str
+    body_storage: str  # Confluence Storage Format (XHTML-like)
     url: str
     parent_id: Optional[str] = None
     attachments: list[Any] = []  # populated in Phase 5
@@ -84,6 +85,7 @@ class _BodyValue(BaseModel):
 
 class _Body(BaseModel):
     view: _BodyValue = Field(default_factory=_BodyValue)
+    storage: _BodyValue = Field(default_factory=_BodyValue)
 
 
 class _Ancestor(BaseModel):
@@ -197,6 +199,7 @@ class PagesClient:
                 email=resp.version.by.email,
             ),
             body_html=resp.body.view.value,
+            body_storage=resp.body.storage.value,
             url=f"{self._base_url}{webui}" if webui else "",
             parent_id=parent_id,
         )

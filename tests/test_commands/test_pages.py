@@ -46,7 +46,10 @@ _CONTENT_RESPONSE = {
         "createdDate": "2023-01-01T00:00:00.000Z",
         "createdBy": {"displayName": "Jane Smith"},
     },
-    "body": {"view": {"value": "<p>Hello <strong>world</strong></p>"}},
+    "body": {
+        "view": {"value": "<p>Hello <strong>world</strong></p>"},
+        "storage": {"value": "<p>Hello <ac:structured-macro ac:name=\"strong\" /></p>"},
+    },
     "ancestors": [],
     "_links": {"webui": "/wiki/spaces/DEV/pages/123"},
 }
@@ -121,6 +124,12 @@ class TestPagesGet:
         assert data["id"] == "123"
         assert data["title"] == "Getting Started"
         assert "body_html" in data
+
+    def test_storage_output(self, httpx_mock: HTTPXMock) -> None:
+        httpx_mock.add_response(json=_CONTENT_RESPONSE)
+        result = runner.invoke(app, ["pages", "get", "123", "--format", "storage"])
+        assert result.exit_code == 0
+        assert "ac:structured-macro" in result.output
 
     def test_not_found_exits_3(self, httpx_mock: HTTPXMock) -> None:
         httpx_mock.add_response(status_code=404)
