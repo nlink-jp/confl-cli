@@ -17,7 +17,7 @@ Designed around the UNIX philosophy — stdout is data, stderr is logs — so it
 ## Installation
 
 ```bash
-uv tool install confl-cli
+uv tool install git+https://github.com/magifd2/confl-cli.git
 ```
 
 ## Configuration
