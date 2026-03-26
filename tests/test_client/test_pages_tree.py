@@ -208,3 +208,43 @@ class TestGetTree:
         assert tree.children[0].id == "200"
         assert len(tree.children[0].children) == 1
         assert tree.children[0].children[0].id == "300"
+
+    def test_truncated_ancestor_chain_child_before_parent(
+        self, httpx_mock: HTTPXMock
+    ) -> None:
+        """Regression: Confluence Cloud can return a page whose ancestors list
+        is truncated (omits intermediate nodes), causing the child to have the
+        same len(ancestors) as its parent.  The old single-pass code processed
+        the child before the parent was in `nodes`, incorrectly attaching it to
+        root.  The two-pass approach must handle this regardless of API order.
+        """
+        # Root (100) → Page A (200) → Page B (201)
+        # But the API returns B BEFORE A, and B's ancestors list is truncated:
+        # it only contains the direct parent (200), not the full chain [100, 200].
+        # As a result both A and B have len(ancestors) == 1.
+        page_a = {
+            "id": "200",
+            "title": "Page A",
+            "version": {"when": "2024-01-15T00:00:00.000Z"},
+            "history": {"createdDate": "2024-01-05T00:00:00.000Z"},
+            "ancestors": [{"id": "100"}],  # direct child of root
+            "_links": {"webui": "/wiki/spaces/DEV/pages/200"},
+        }
+        page_b = {
+            "id": "201",
+            "title": "Page B",
+            "version": {"when": "2024-01-16T00:00:00.000Z"},
+            "history": {"createdDate": "2024-01-06T00:00:00.000Z"},
+            # Truncated: only direct parent, not the full [100, 200] chain
+            "ancestors": [{"id": "200"}],
+            "_links": {"webui": "/wiki/spaces/DEV/pages/201"},
+        }
+        httpx_mock.add_response(json=_ROOT_META)
+        # API returns B before A (both have len(ancestors)==1 after sort)
+        httpx_mock.add_response(json=_descendants(page_b, page_a))
+        client = _make_client(httpx_mock)
+        tree = client.get_tree("100")
+        assert len(tree.children) == 1, "Page A must be a direct child of root"
+        assert tree.children[0].id == "200"
+        assert len(tree.children[0].children) == 1, "Page B must be a child of A"
+        assert tree.children[0].children[0].id == "201"

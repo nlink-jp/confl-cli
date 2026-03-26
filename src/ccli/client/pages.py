@@ -296,39 +296,47 @@ class PagesClient:
         if not descendants:
             return root
 
-        # Sort shallowest-first so parents are always added before their children.
-        descendants.sort(key=lambda d: len(d.ancestors))
+        # Determine root_global_depth: the index of page_id in the ancestor chain
+        # of a descendant that actually contains it.  Used only for depth filtering.
+        root_global_depth = 0
+        for desc in descendants:
+            for i, anc in enumerate(desc.ancestors):
+                if anc.id == page_id:
+                    root_global_depth = i
+                    break
+            else:
+                continue
+            break
 
-        # Determine how many global ancestors the root page has (its depth in
-        # the Confluence hierarchy) by looking at the first descendant's chain.
-        first_ancestors = descendants[0].ancestors
-        root_global_depth = next(
-            (i for i, a in enumerate(first_ancestors) if a.id == page_id), 0
-        )
-
+        # Pass 1 — create PageNode objects for every descendant within the depth
+        # limit.  All nodes are registered in `nodes` before any linking happens,
+        # so Pass 2 is immune to the order in which the API returns pages.
         nodes: dict[str, PageNode] = {page_id: root}
         for desc in descendants:
-            depth_from_root = len(desc.ancestors) - root_global_depth
-            if depth is not None and depth_from_root > depth:
-                continue
-            node = PageNode(
+            if depth is not None:
+                depth_from_root = len(desc.ancestors) - root_global_depth
+                if depth_from_root > depth:
+                    continue
+            nodes[desc.id] = PageNode(
                 id=desc.id,
                 title=desc.title,
                 url=f"{self._base_url}{desc.links.webui}" if desc.links.webui else "",
                 created_at=desc.history.created_date,
                 updated_at=desc.version.when,
             )
-            nodes[desc.id] = node
-            # Walk up the ancestor chain (closest first) to find a parent already
-            # in our nodes dict.  This handles Confluence instances where the
-            # ancestors list includes a virtual space-root node that is not a real
-            # page (so its ID never appears in nodes).  Falls back to root.
+
+        # Pass 2 — link each node to its nearest known ancestor.
+        # Walking from closest ancestor outward handles Confluence Cloud instances
+        # that omit intermediate ancestors or include virtual space-root nodes.
+        for desc in descendants:
+            if desc.id not in nodes:
+                continue
             parent: PageNode = root
             for anc in reversed(desc.ancestors):
                 if anc.id in nodes:
                     parent = nodes[anc.id]
                     break
-            parent.children.append(node)
+            parent.children.append(nodes[desc.id])
 
         return root
 
