@@ -17,7 +17,7 @@ Designed around the UNIX philosophy — stdout is data, stderr is logs — so it
 ## Installation
 
 ```bash
-uv tool install git+https://github.com/magifd2/confl-cli.git
+uv tool install git+https://github.com/nlink-jp/confl-cli.git
 ```
 
 ## Configuration
@@ -134,7 +134,7 @@ Each node in the JSON output contains:
 Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/magifd2/confl-cli.git
+git clone https://github.com/nlink-jp/confl-cli.git
 cd ccli
 uv sync --all-extras
 ```

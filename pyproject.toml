@@ -33,9 +33,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/magifd2/confl-cli"
-Repository = "https://github.com/magifd2/confl-cli.git"
-"Bug Tracker" = "https://github.com/magifd2/confl-cli/issues"
+Homepage = "https://github.com/nlink-jp/confl-cli"
+Repository = "https://github.com/nlink-jp/confl-cli.git"
+"Bug Tracker" = "https://github.com/nlink-jp/confl-cli/issues"
 
 [project.scripts]
 confl-cli = "ccli.main:app"
