@@ -11,8 +11,8 @@
 ### Phase 0: プロジェクト基盤 ✅
 **目標**: 開発環境・プロジェクト構造の確立
 
-- [x] 詳細仕様書作成（`docs/spec.md`）
-- [x] 開発計画作成（`docs/plan.md`）
+- [x] 詳細仕様書作成（`docs/ja/spec.ja.md`）
+- [x] 開発計画作成（`docs/ja/plan.ja.md`）
 - [x] `pyproject.toml` 作成（依存関係・ビルド設定）
 - [x] ディレクトリ構造の作成
 - [x] `CHANGELOG.md` 初期化
@@ -100,7 +100,7 @@
 - [x] テストカバレッジ 94%（目標 80% 超）
 - [x] CHANGELOG.md 全フェーズ記載
 - [x] README.md・README.ja.md（日英二言語）最終更新
-- [x] docs/plan.md 全フェーズ完了マーク
+- [x] docs/ja/plan.ja.md 全フェーズ完了マーク
 
 ## ディレクトリ構造
 
@@ -114,8 +114,12 @@ ccli/
 ├── CHANGELOG.md
 ├── CLAUDE.md
 ├── docs/
-│   ├── spec.md
-│   └── plan.md
+│   ├── en/
+│   │   ├── spec.md
+│   │   └── plan.md
+│   └── ja/
+│       ├── spec.ja.md
+│       └── plan.ja.md
 ├── src/
 │   └── ccli/
 │       ├── __init__.py

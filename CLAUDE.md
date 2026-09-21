@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 `ccli` is a CLI tool for operating Atlassian Confluence Cloud from the command line.
 Built with Python + uv, following UNIX philosophy (pipe-friendly, stdout/stderr separation).
 
-See `docs/spec.md` for detailed specifications and `docs/plan.md` for the development roadmap.
+See `docs/en/spec.md` for detailed specifications and `docs/en/plan.md` for the development roadmap. The Japanese counterparts are `docs/ja/spec.ja.md` and `docs/ja/plan.ja.md`.
 
 ## Development Commands
 
@@ -43,7 +43,7 @@ uv run confl-cli --help
 - **Test with implementation**: Every source file must have a corresponding test file. Write tests alongside the code, not after.
 - **Test before commit**: All tests must pass before committing.
 - **Small and focused**: Keep functions small. Fix bugs in the smallest possible scope.
-- **Update docs with features**: When adding or changing features, update `docs/spec.md`, `README.md`, and `CHANGELOG.md`.
+- **Update docs with features**: When adding or changing features, update `docs/en/spec.md` and `docs/ja/spec.ja.md`, `README.md` and `README.ja.md`, and `CHANGELOG.md`. A document and its translation change in the same commit.
 - **Changelog required**: Every change goes into `CHANGELOG.md` under `[Unreleased]`.
 
 ## Architecture
