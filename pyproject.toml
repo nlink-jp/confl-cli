@@ -9,7 +9,7 @@ description = "Atlassian Confluence CLI tool"
 readme = "README.md"
 license = { text = "MIT" }
 authors = [{ name = "magifd2" }]
-requires-python = ">=3.11"
+requires-python = ">=3.11.5"
 keywords = ["confluence", "atlassian", "cli"]
 classifiers = [
     "Development Status :: 4 - Beta",

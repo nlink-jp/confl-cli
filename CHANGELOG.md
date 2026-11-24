@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- The locked dependency versions are upgraded. `uv audit` reported 14 known
+  advisories in the previous lock, all in transitive packages; the new lock
+  has none. This affects environments made with `uv sync` from the
+  repository.
+
+### Changed
+
+- **Requires Python 3.11.5 or later** (was 3.11). soupsieve's fixed releases
+  require 3.11.5, and while 3.11.0–3.11.4 stayed in range the lock kept a
+  vulnerable soupsieve 2.10 for them.
+
 ## [0.1.9] - 2026-03-28
 
 ### Internal
