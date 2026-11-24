@@ -19,6 +19,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Requires Python 3.11.5 or later** (was 3.11). soupsieve's fixed releases
   require 3.11.5, and while 3.11.0–3.11.4 stayed in range the lock kept a
   vulnerable soupsieve 2.10 for them.
+- A `Makefile` with `test`, `lint` (ruff check, ruff format --check, mypy)
+  and `vuln` (`uv audit` on the lock; fails on a known advisory). The
+  existing format drift is cleared, so `make lint` passes.
+- README: the development section uses the make targets, and the clone
+  step enters `confl-cli` (it said `ccli`).
 
 ## [0.1.9] - 2026-03-28
 

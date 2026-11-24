@@ -131,28 +131,22 @@ Each node in the JSON output contains:
 
 ## Development
 
-Requires Python 3.11+ and [uv](https://docs.astral.sh/uv/).
+Requires Python 3.11.5+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 git clone https://github.com/nlink-jp/confl-cli.git
-cd ccli
+cd confl-cli
 uv sync --all-extras
 ```
 
-Run tests:
-
 ```bash
-uv run pytest
-uv run pytest --cov=ccli --cov-report=term-missing
+make test    # pytest
+make lint    # ruff check, ruff format --check, mypy
+make vuln    # uv audit: known advisories in the locked dependencies
 ```
 
-Lint / format / type-check:
-
-```bash
-uv run ruff check .
-uv run ruff format .
-uv run mypy src/
-```
+Coverage: `uv run --extra dev pytest --cov=ccli --cov-report=term-missing`.
+Apply formatting: `uv run --extra dev ruff format src tests`.
 
 ## License
 

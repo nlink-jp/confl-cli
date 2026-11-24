@@ -130,28 +130,22 @@ confl-cli pages tree 123456789 --page-format json --attachments --output-dir ./d
 
 ## 開発
 
-Python 3.11 以上と [uv](https://docs.astral.sh/uv/) が必要です。
+Python 3.11.5 以上と [uv](https://docs.astral.sh/uv/) が必要です。
 
 ```bash
 git clone https://github.com/nlink-jp/confl-cli.git
-cd ccli
+cd confl-cli
 uv sync --all-extras
 ```
 
-テスト実行:
-
 ```bash
-uv run pytest
-uv run pytest --cov=ccli --cov-report=term-missing
+make test    # pytest
+make lint    # ruff check・ruff format --check・mypy
+make vuln    # uv audit: ロックした依存の既知の勧告
 ```
 
-Lint / フォーマット / 型チェック:
-
-```bash
-uv run ruff check .
-uv run ruff format .
-uv run mypy src/
-```
+カバレッジ: `uv run --extra dev pytest --cov=ccli --cov-report=term-missing`。
+整形の適用: `uv run --extra dev ruff format src tests`。
 
 ## ライセンス
 
