@@ -43,7 +43,7 @@ _CONTENT_RESPONSE = {
         "view": {"value": "<p>Hello <strong>world</strong></p>"},
         "storage": {
             "value": (
-                "<p>Hello <ac:structured-macro ac:name=\"strong\">"
+                '<p>Hello <ac:structured-macro ac:name="strong">'
                 "<ac:rich-text-body>world</ac:rich-text-body>"
                 "</ac:structured-macro></p>"
             )

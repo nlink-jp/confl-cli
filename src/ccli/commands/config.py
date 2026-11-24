@@ -23,9 +23,7 @@ def config_init(
     username = typer.prompt("Username (email address)")
     api_token = typer.prompt("API Token", hide_input=True)
 
-    config = Config(
-        confluence=ConfluenceSettings(url=url, username=username, api_token=api_token)
-    )
+    config = Config(confluence=ConfluenceSettings(url=url, username=username, api_token=api_token))
 
     try:
         saved_path = save_config(config, dest)

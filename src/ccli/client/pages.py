@@ -241,9 +241,8 @@ class PagesClient:
                     space_key=content.space.key if content else "",
                     space_name=content.space.name if content else "",
                     title=_strip_highlights(result.title),
-                    url=result.url or (
-                        self._base_url + content.links.get("webui", "") if content else ""
-                    ),
+                    url=result.url
+                    or (self._base_url + content.links.get("webui", "") if content else ""),
                     last_modified=result.last_modified,
                     excerpt=_strip_highlights(result.excerpt),
                 )
@@ -341,9 +340,7 @@ class PagesClient:
         return root
 
     def _get_page_meta(self, page_id: str) -> PageNode:
-        data = self._client.get(
-            f"{_CONTENT_PATH}/{page_id}", params={"expand": "version,history"}
-        )
+        data = self._client.get(f"{_CONTENT_PATH}/{page_id}", params={"expand": "version,history"})
         meta = _V1PageMeta(**data)
         return PageNode(
             id=meta.id,
@@ -365,9 +362,7 @@ class PagesClient:
                 "limit": limit,
                 "start": start,
             }
-            data = self._client.get(
-                f"{_CONTENT_PATH}/{page_id}/descendant/page", params=params
-            )
+            data = self._client.get(f"{_CONTENT_PATH}/{page_id}/descendant/page", params=params)
             resp = _V1DescendantsResponse(**data)
             descendants.extend(resp.results)
 

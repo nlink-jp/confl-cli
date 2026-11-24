@@ -70,9 +70,7 @@ class TestAttachmentsList:
         httpx_mock.add_response(
             json={
                 "results": [_ATT_A],
-                "_links": {
-                    "next": f"{BASE_URL}/wiki/api/v2/pages/100/attachments?cursor=xyz"
-                },
+                "_links": {"next": f"{BASE_URL}/wiki/api/v2/pages/100/attachments?cursor=xyz"},
             }
         )
         httpx_mock.add_response(json={"results": [_ATT_B], "_links": {}})

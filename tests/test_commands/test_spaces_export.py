@@ -48,7 +48,7 @@ def set_env(monkeypatch: pytest.MonkeyPatch) -> None:
 class TestSpacesExport:
     def test_text_output_shows_tree(self, httpx_mock: HTTPXMock) -> None:
         httpx_mock.add_response(json=_SPACE_DETAIL)  # space detail
-        httpx_mock.add_response(json=_ROOT_META)     # root page meta
+        httpx_mock.add_response(json=_ROOT_META)  # root page meta
         httpx_mock.add_response(json=_descendants(_DESC_CHILD))  # descendants
         result = runner.invoke(app, ["spaces", "export", "DEV"])
         assert result.exit_code == 0

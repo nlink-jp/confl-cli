@@ -94,7 +94,9 @@ def spaces_export(
         None, "--depth", "-d", help="Max recursion depth (default: unlimited)."
     ),
     format: TreeOutputFormat = typer.Option(TreeOutputFormat.text, "--format", "-f"),
-    with_attachments: bool = typer.Option(False, "--attachments", help="Fetch attachment metadata."),  # noqa: E501
+    with_attachments: bool = typer.Option(
+        False, "--attachments", help="Fetch attachment metadata."
+    ),  # noqa: E501
     output_dir: Path | None = typer.Option(
         None, "--output-dir", help="Download attachments to this directory."
     ),
@@ -118,7 +120,14 @@ def spaces_export(
         raise typer.Exit(code=exc.exit_code) from None
 
     _execute_tree(
-        homepage_id, config, http_client, cc,
-        depth=depth, format=format, with_attachments=with_attachments,
-        output_dir=output_dir, page_format=page_format, no_rewrite_links=no_rewrite_links,
+        homepage_id,
+        config,
+        http_client,
+        cc,
+        depth=depth,
+        format=format,
+        with_attachments=with_attachments,
+        output_dir=output_dir,
+        page_format=page_format,
+        no_rewrite_links=no_rewrite_links,
     )

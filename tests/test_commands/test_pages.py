@@ -48,7 +48,7 @@ _CONTENT_RESPONSE = {
     },
     "body": {
         "view": {"value": "<p>Hello <strong>world</strong></p>"},
-        "storage": {"value": "<p>Hello <ac:structured-macro ac:name=\"strong\" /></p>"},
+        "storage": {"value": '<p>Hello <ac:structured-macro ac:name="strong" /></p>'},
     },
     "ancestors": [],
     "_links": {"webui": "/wiki/spaces/DEV/pages/123"},

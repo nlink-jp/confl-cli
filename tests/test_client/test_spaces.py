@@ -14,7 +14,11 @@ SPACE_DETAIL_URL = f"{BASE_URL}/wiki/rest/api/space"
 _SPACE_A = {"id": "1", "key": "DEV", "name": "Development", "type": "global", "status": "current"}
 _SPACE_B = {"id": "2", "key": "ARCH", "name": "Architecture", "type": "global", "status": "current"}
 _SPACE_P = {
-    "id": "3", "key": "~john", "name": "John's Space", "type": "personal", "status": "current"
+    "id": "3",
+    "key": "~john",
+    "name": "John's Space",
+    "type": "personal",
+    "status": "current",
 }
 
 
@@ -27,9 +31,7 @@ def _make_spaces_client(httpx_mock: HTTPXMock) -> SpacesClient:
 
 class TestSpacesList:
     def test_returns_spaces(self, httpx_mock: HTTPXMock) -> None:
-        httpx_mock.add_response(
-            json={"results": [_SPACE_A, _SPACE_B], "_links": {}}
-        )
+        httpx_mock.add_response(json={"results": [_SPACE_A, _SPACE_B], "_links": {}})
         client = _make_spaces_client(httpx_mock)
         spaces = client.list(limit=25)
         assert len(spaces) == 2
@@ -37,9 +39,7 @@ class TestSpacesList:
         assert spaces[1].key == "ARCH"
 
     def test_respects_limit(self, httpx_mock: HTTPXMock) -> None:
-        httpx_mock.add_response(
-            json={"results": [_SPACE_A, _SPACE_B], "_links": {}}
-        )
+        httpx_mock.add_response(json={"results": [_SPACE_A, _SPACE_B], "_links": {}})
         client = _make_spaces_client(httpx_mock)
         spaces = client.list(limit=1)
         assert len(spaces) == 1
@@ -51,9 +51,7 @@ class TestSpacesList:
                 "_links": {"next": "/wiki/api/v2/spaces?cursor=abc&limit=1"},
             }
         )
-        httpx_mock.add_response(
-            json={"results": [_SPACE_B], "_links": {}}
-        )
+        httpx_mock.add_response(json={"results": [_SPACE_B], "_links": {}})
         client = _make_spaces_client(httpx_mock)
         spaces = client.list(limit=10)
         assert len(spaces) == 2
@@ -74,34 +72,26 @@ class TestSpacesList:
 
 class TestSpacesSearch:
     def test_matches_by_name(self, httpx_mock: HTTPXMock) -> None:
-        httpx_mock.add_response(
-            json={"results": [_SPACE_A, _SPACE_B, _SPACE_P], "_links": {}}
-        )
+        httpx_mock.add_response(json={"results": [_SPACE_A, _SPACE_B, _SPACE_P], "_links": {}})
         client = _make_spaces_client(httpx_mock)
         results = client.search("arch")
         assert len(results) == 1
         assert results[0].key == "ARCH"
 
     def test_matches_by_key(self, httpx_mock: HTTPXMock) -> None:
-        httpx_mock.add_response(
-            json={"results": [_SPACE_A, _SPACE_B, _SPACE_P], "_links": {}}
-        )
+        httpx_mock.add_response(json={"results": [_SPACE_A, _SPACE_B, _SPACE_P], "_links": {}})
         client = _make_spaces_client(httpx_mock)
         results = client.search("dev")
         assert results[0].key == "DEV"
 
     def test_case_insensitive(self, httpx_mock: HTTPXMock) -> None:
-        httpx_mock.add_response(
-            json={"results": [_SPACE_A], "_links": {}}
-        )
+        httpx_mock.add_response(json={"results": [_SPACE_A], "_links": {}})
         client = _make_spaces_client(httpx_mock)
         results = client.search("DEVELOPMENT")
         assert len(results) == 1
 
     def test_no_match_returns_empty(self, httpx_mock: HTTPXMock) -> None:
-        httpx_mock.add_response(
-            json={"results": [_SPACE_A, _SPACE_B], "_links": {}}
-        )
+        httpx_mock.add_response(json={"results": [_SPACE_A, _SPACE_B], "_links": {}})
         client = _make_spaces_client(httpx_mock)
         assert client.search("zzznomatch") == []
 

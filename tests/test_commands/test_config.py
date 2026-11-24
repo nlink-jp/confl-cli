@@ -54,11 +54,13 @@ class TestConfigShow:
 class TestConfigInit:
     def test_creates_config_file(self, tmp_path: Path) -> None:
         config_file = tmp_path / "config.toml"
-        user_input = "\n".join([
-            "https://example.atlassian.net",
-            "user@example.com",
-            "my-api-token",
-        ])
+        user_input = "\n".join(
+            [
+                "https://example.atlassian.net",
+                "user@example.com",
+                "my-api-token",
+            ]
+        )
         result = runner.invoke(
             app,
             ["config", "init", "--config", str(config_file)],
@@ -73,11 +75,13 @@ class TestConfigInit:
 
     def test_output_includes_saved_path(self, tmp_path: Path) -> None:
         config_file = tmp_path / "config.toml"
-        user_input = "\n".join([
-            "https://example.atlassian.net",
-            "user@example.com",
-            "token",
-        ])
+        user_input = "\n".join(
+            [
+                "https://example.atlassian.net",
+                "user@example.com",
+                "token",
+            ]
+        )
         result = runner.invoke(
             app,
             ["config", "init", "--config", str(config_file)],

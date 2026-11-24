@@ -1,4 +1,5 @@
 """Integration tests for link rewriting in pages get / pages tree."""
+
 from pathlib import Path
 
 import pytest
@@ -81,9 +82,7 @@ def set_env(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 class TestPagesGetLinkRewrite:
-    def test_page_links_rewritten_in_markdown(
-        self, httpx_mock: HTTPXMock, tmp_path: Path
-    ) -> None:
+    def test_page_links_rewritten_in_markdown(self, httpx_mock: HTTPXMock, tmp_path: Path) -> None:
         httpx_mock.add_response(json=_PAGE_WITH_LINKS)
         result = runner.invoke(
             app,
@@ -103,11 +102,16 @@ class TestPagesGetLinkRewrite:
         result = runner.invoke(
             app,
             [
-                "pages", "get", "100",
-                "--format", "text",
+                "pages",
+                "get",
+                "100",
+                "--format",
+                "text",
                 "--attachments",
-                "--output-dir", str(tmp_path),
-                "--base-path", str(tmp_path),
+                "--output-dir",
+                str(tmp_path),
+                "--base-path",
+                str(tmp_path),
             ],
         )
         assert result.exit_code == 0
@@ -121,18 +125,20 @@ class TestPagesGetLinkRewrite:
         result = runner.invoke(
             app,
             [
-                "pages", "get", "100",
-                "--format", "text",
-                "--base-path", str(tmp_path),
+                "pages",
+                "get",
+                "100",
+                "--format",
+                "text",
+                "--base-path",
+                str(tmp_path),
                 "--no-rewrite-links",
             ],
         )
         assert result.exit_code == 0
         assert "/wiki/spaces/DEV/pages/200" in result.output
 
-    def test_html_format_links_rewritten(
-        self, httpx_mock: HTTPXMock, tmp_path: Path
-    ) -> None:
+    def test_html_format_links_rewritten(self, httpx_mock: HTTPXMock, tmp_path: Path) -> None:
         httpx_mock.add_response(json=_PAGE_WITH_LINKS)
         result = runner.invoke(
             app,
@@ -148,9 +154,7 @@ class TestPagesGetLinkRewrite:
         # Without --base-path, Confluence page links appear unchanged in Markdown
         assert "/wiki/spaces/DEV/pages/200" in result.output
 
-    def test_json_format_not_rewritten(
-        self, httpx_mock: HTTPXMock, tmp_path: Path
-    ) -> None:
+    def test_json_format_not_rewritten(self, httpx_mock: HTTPXMock, tmp_path: Path) -> None:
         httpx_mock.add_response(json=_PAGE_WITH_LINKS)
         result = runner.invoke(
             app,
@@ -195,16 +199,20 @@ class TestPagesTreeLinkRewrite:
         # _populate_tree_attachments processes each node: att → page_content (depth-first)
         # root (100): attachments, then page content
         httpx_mock.add_response(json={"results": [], "_links": {}})  # att for 100
-        httpx_mock.add_response(json=_PAGE_WITH_LINKS)               # page content 100
+        httpx_mock.add_response(json=_PAGE_WITH_LINKS)  # page content 100
         # child (200): attachments, then page content
         httpx_mock.add_response(json={"results": [], "_links": {}})  # att for 200
         httpx_mock.add_response(json={**_PAGE_WITH_LINKS, "id": "200"})  # page content 200
         result = runner.invoke(
             app,
             [
-                "pages", "tree", "100",
-                "--output-dir", str(tmp_path),
-                "--page-format", "text",
+                "pages",
+                "tree",
+                "100",
+                "--output-dir",
+                str(tmp_path),
+                "--page-format",
+                "text",
             ],
         )
         assert result.exit_code == 0
@@ -220,15 +228,19 @@ class TestPagesTreeLinkRewrite:
     ) -> None:
         self._setup_two_node_tree(httpx_mock)
         httpx_mock.add_response(json={"results": [], "_links": {}})  # att for 100
-        httpx_mock.add_response(json=_PAGE_WITH_LINKS)               # page content 100
+        httpx_mock.add_response(json=_PAGE_WITH_LINKS)  # page content 100
         httpx_mock.add_response(json={"results": [], "_links": {}})  # att for 200
         httpx_mock.add_response(json={**_PAGE_WITH_LINKS, "id": "200"})  # page content 200
         result = runner.invoke(
             app,
             [
-                "pages", "tree", "100",
-                "--output-dir", str(tmp_path),
-                "--page-format", "text",
+                "pages",
+                "tree",
+                "100",
+                "--output-dir",
+                str(tmp_path),
+                "--page-format",
+                "text",
                 "--no-rewrite-links",
             ],
         )

@@ -130,9 +130,7 @@ class TestGetTree:
     def test_pagination_in_descendants(self, httpx_mock: HTTPXMock) -> None:
         httpx_mock.add_response(json=_ROOT_META)
         # First page: size == limit → fetch more
-        httpx_mock.add_response(
-            json={"results": [_DESC_CHILD_A], "size": 250, "limit": 250}
-        )
+        httpx_mock.add_response(json={"results": [_DESC_CHILD_A], "size": 250, "limit": 250})
         # Second page: size < limit → stop
         httpx_mock.add_response(json=_descendants(_DESC_CHILD_B))
         client = _make_client(httpx_mock)
@@ -165,9 +163,7 @@ class TestGetTree:
         assert len(tree.children) == 1
         assert tree.children[0].id == "201"
 
-    def test_space_home_page_virtual_root_in_ancestors(
-        self, httpx_mock: HTTPXMock
-    ) -> None:
+    def test_space_home_page_virtual_root_in_ancestors(self, httpx_mock: HTTPXMock) -> None:
         """Regression: Confluence Cloud sometimes returns a virtual space-root node
         in the ancestors list instead of (or in addition to) the queried page.
         Children whose ancestors don't include the queried page ID must still be
@@ -209,9 +205,7 @@ class TestGetTree:
         assert len(tree.children[0].children) == 1
         assert tree.children[0].children[0].id == "300"
 
-    def test_truncated_ancestor_chain_child_before_parent(
-        self, httpx_mock: HTTPXMock
-    ) -> None:
+    def test_truncated_ancestor_chain_child_before_parent(self, httpx_mock: HTTPXMock) -> None:
         """Regression: Confluence Cloud can return a page whose ancestors list
         is truncated (omits intermediate nodes), causing the child to have the
         same len(ancestors) as its parent.  The old single-pass code processed

@@ -76,7 +76,9 @@ def pages_search(
 def pages_get(
     page_id: str = typer.Argument(help="Page ID."),
     format: OutputFormat = typer.Option(OutputFormat.text, "--format", "-f"),
-    with_attachments: bool = typer.Option(False, "--attachments", help="Fetch attachment metadata."),  # noqa: E501
+    with_attachments: bool = typer.Option(
+        False, "--attachments", help="Fetch attachment metadata."
+    ),  # noqa: E501
     output_dir: Path | None = typer.Option(
         None, "--output-dir", help="Download attachments to this directory."
     ),
@@ -124,8 +126,10 @@ def pages_get(
         print_json(page.model_dump())
     elif format == OutputFormat.storage:
         print(page.body_storage)
-    elif not no_rewrite_links and base_path is not None and format in (
-        OutputFormat.text, OutputFormat.html
+    elif (
+        not no_rewrite_links
+        and base_path is not None
+        and format in (OutputFormat.text, OutputFormat.html)
     ):
         page_filename = _PAGE_FORMAT_EXT[format]
         current_file = base_path / page_id / page_filename
@@ -133,8 +137,12 @@ def pages_get(
         if format == OutputFormat.html:
             print_html(
                 _rewrite_html(
-                    page.body_html, current_file, {}, att_map,
-                    base_path=base_path, page_filename=page_filename,
+                    page.body_html,
+                    current_file,
+                    {},
+                    att_map,
+                    base_path=base_path,
+                    page_filename=page_filename,
                     base_url=config.confluence.url,
                 )
             )
@@ -142,8 +150,12 @@ def pages_get(
             md = html_to_markdown(page.body_html)
             print(
                 _rewrite_markdown(
-                    md, current_file, {}, att_map,
-                    base_path=base_path, page_filename=page_filename,
+                    md,
+                    current_file,
+                    {},
+                    att_map,
+                    base_path=base_path,
+                    page_filename=page_filename,
                     base_url=config.confluence.url,
                 )
             )
@@ -177,16 +189,24 @@ def _save_page_content(
         content = html_to_markdown(page.body_html)
         if pm or am:
             content = _rewrite_markdown(
-                content, dest, pm, am,
-                page_filename=_PAGE_FORMAT_EXT[page_format], base_url=base_url,
+                content,
+                dest,
+                pm,
+                am,
+                page_filename=_PAGE_FORMAT_EXT[page_format],
+                base_url=base_url,
             )
         dest.write_text(content, encoding="utf-8")
     elif page_format == OutputFormat.html:
         content = page.body_html
         if pm or am:
             content = _rewrite_html(
-                content, dest, pm, am,
-                page_filename=_PAGE_FORMAT_EXT[page_format], base_url=base_url,
+                content,
+                dest,
+                pm,
+                am,
+                page_filename=_PAGE_FORMAT_EXT[page_format],
+                base_url=base_url,
             )
         dest.write_text(content, encoding="utf-8")
     elif page_format == OutputFormat.json:
@@ -228,7 +248,10 @@ def _execute_tree(
 
     if with_attachments or output_dir:
         _populate_tree_attachments(
-            tree, AttachmentsClient(cc), http_client, output_dir,
+            tree,
+            AttachmentsClient(cc),
+            http_client,
+            output_dir,
             pages_client=pc if page_format is not None else None,
             page_format=page_format,
             page_map=page_map,
@@ -248,7 +271,9 @@ def pages_tree(
         None, "--depth", "-d", help="Max recursion depth (default: unlimited)."
     ),
     format: TreeOutputFormat = typer.Option(TreeOutputFormat.text, "--format", "-f"),
-    with_attachments: bool = typer.Option(False, "--attachments", help="Fetch attachment metadata."),  # noqa: E501
+    with_attachments: bool = typer.Option(
+        False, "--attachments", help="Fetch attachment metadata."
+    ),  # noqa: E501
     output_dir: Path | None = typer.Option(
         None, "--output-dir", help="Download attachments to this directory."
     ),
@@ -266,9 +291,16 @@ def pages_tree(
 
     config, http_client, cc = _setup()
     _execute_tree(
-        page_id, config, http_client, cc,
-        depth=depth, format=format, with_attachments=with_attachments,
-        output_dir=output_dir, page_format=page_format, no_rewrite_links=no_rewrite_links,
+        page_id,
+        config,
+        http_client,
+        cc,
+        depth=depth,
+        format=format,
+        with_attachments=with_attachments,
+        output_dir=output_dir,
+        page_format=page_format,
+        no_rewrite_links=no_rewrite_links,
     )
 
 
@@ -303,8 +335,12 @@ def _populate_tree_attachments(
                 page = pages_client.get(node.id)
                 att_map = build_attachment_map(attachments) if page_map is not None else {}
                 _save_page_content(
-                    page, output_dir / node.id, page_format,
-                    page_map=page_map, attachment_map=att_map, base_url=base_url,
+                    page,
+                    output_dir / node.id,
+                    page_format,
+                    page_map=page_map,
+                    attachment_map=att_map,
+                    base_url=base_url,
                 )
             except CCLIError as exc:
                 typer.echo(f"Warning: page content for {node.id} unavailable: {exc}", err=True)
@@ -315,6 +351,12 @@ def _populate_tree_attachments(
 
     for child in node.children:
         _populate_tree_attachments(
-            child, attach_client, http_client, output_dir,
-            pages_client, page_format, page_map, base_url,
+            child,
+            attach_client,
+            http_client,
+            output_dir,
+            pages_client,
+            page_format,
+            page_map,
+            base_url,
         )

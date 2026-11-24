@@ -1,4 +1,3 @@
-
 from importlib.metadata import version as _pkg_version
 
 import typer

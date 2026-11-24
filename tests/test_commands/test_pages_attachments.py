@@ -59,6 +59,7 @@ _PAGE_META = {
     "_links": {"webui": "/wiki/spaces/DEV/pages/100"},
 }
 
+
 def _descendants(*pages: dict) -> dict:  # type: ignore[type-arg]
     return {"results": list(pages), "size": len(pages), "limit": 250}
 
@@ -101,9 +102,14 @@ class TestPagesGetAttachments:
         result = runner.invoke(
             app,
             [
-                "pages", "get", "123",
-                "--attachments", "--output-dir", str(tmp_path),
-                "--format", "json",
+                "pages",
+                "get",
+                "123",
+                "--attachments",
+                "--output-dir",
+                str(tmp_path),
+                "--format",
+                "json",
             ],
         )
         assert result.exit_code == 0
@@ -127,17 +133,13 @@ class TestPagesTreeAttachments:
     def test_attachments_in_tree_json(self, httpx_mock: HTTPXMock) -> None:
         self._setup_tree(httpx_mock)
         httpx_mock.add_response(json=_ATTACHMENTS_RESPONSE)
-        result = runner.invoke(
-            app, ["pages", "tree", "100", "--attachments", "--format", "json"]
-        )
+        result = runner.invoke(app, ["pages", "tree", "100", "--attachments", "--format", "json"])
         assert result.exit_code == 0
         data = json.loads(result.output)
         assert len(data["attachments"]) == 1
         assert data["attachments"][0]["filename"] == "report.pdf"
 
-    def test_attachments_downloaded_for_tree(
-        self, httpx_mock: HTTPXMock, tmp_path: Path
-    ) -> None:
+    def test_attachments_downloaded_for_tree(self, httpx_mock: HTTPXMock, tmp_path: Path) -> None:
         self._setup_tree(httpx_mock)
         httpx_mock.add_response(json=_ATTACHMENTS_RESPONSE)
         httpx_mock.add_response(content=b"file data")
@@ -204,9 +206,13 @@ class TestPagesTreePageFormat:
         result = runner.invoke(
             app,
             [
-                "pages", "tree", "100",
-                "--output-dir", str(tmp_path),
-                "--page-format", "storage",
+                "pages",
+                "tree",
+                "100",
+                "--output-dir",
+                str(tmp_path),
+                "--page-format",
+                "storage",
             ],
         )
         assert result.exit_code == 0
@@ -220,9 +226,14 @@ class TestPagesTreePageFormat:
         result = runner.invoke(
             app,
             [
-                "pages", "tree", "100",
-                "--attachments", "--output-dir", str(tmp_path),
-                "--page-format", "text",
+                "pages",
+                "tree",
+                "100",
+                "--attachments",
+                "--output-dir",
+                str(tmp_path),
+                "--page-format",
+                "text",
             ],
         )
         assert result.exit_code == 0

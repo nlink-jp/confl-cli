@@ -77,9 +77,7 @@ class SpacesClient:
         Uses the v1 ``/space/{key}?expand=homepage`` endpoint.
         Raises :exc:`NotFoundError` if the space does not exist or has no homepage.
         """
-        data = self._client.get(
-            f"{_SPACE_DETAIL_PATH}/{space_key}", params={"expand": "homepage"}
-        )
+        data = self._client.get(f"{_SPACE_DETAIL_PATH}/{space_key}", params={"expand": "homepage"})
         detail = _V1SpaceDetail(**data)
         if detail.homepage is None:
             raise NotFoundError(f"Space '{space_key}' has no homepage.")

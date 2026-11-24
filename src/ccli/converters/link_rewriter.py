@@ -1,4 +1,5 @@
 """Rewrite Confluence page and attachment links to local file paths."""
+
 from __future__ import annotations
 
 import os
@@ -14,13 +15,9 @@ from ..client.pages import PageNode
 # ---------------------------------------------------------------------------
 
 # /wiki/spaces/KEY/pages/ID[/optional-title][#anchor]
-_PAGE_PATH_RE = re.compile(
-    r"^/wiki/spaces/[^/#]+/pages/(\d+)(?:/[^#]*)?(#[^\s\"')]*)?$"
-)
+_PAGE_PATH_RE = re.compile(r"^/wiki/spaces/[^/#]+/pages/(\d+)(?:/[^#]*)?(#[^\s\"')]*)?$")
 # /wiki/download/attachments/PAGE_ID/filename
-_ATTACHMENT_PATH_RE = re.compile(
-    r"^/wiki/download/attachments/\d+/[^?#\"'\s)]+$"
-)
+_ATTACHMENT_PATH_RE = re.compile(r"^/wiki/download/attachments/\d+/[^?#\"'\s)]+$")
 # href="..." or src="..."  (both single- and double-quoted)
 _HTML_ATTR_RE = re.compile(r'\b(href|src)=(["\'])([^"\']*)\2')
 # [text](url) and ![alt](url)  — URL must not contain spaces
@@ -62,7 +59,7 @@ def _normalize_url(url: str, base_url: str) -> str:
     """Strip *base_url* prefix and scheme+host; remove query params but keep anchor."""
     path = url
     if base_url and path.startswith(base_url):
-        path = path[len(base_url):]
+        path = path[len(base_url) :]
     # strip scheme://host
     path = re.sub(r"^https?://[^/]+", "", path)
     # remove query string, preserve anchor
